@@ -1,7 +1,6 @@
 name: Fairseq Release
 
-on:
-  push:
+on: push
 
 jobs:
 
