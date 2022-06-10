@@ -1,12 +1,7 @@
 name: Fairseq Release
 
 on:
-  workflow_dispatch:
-    inputs:
-      name:
-        description: 'Release Type'
-        default: 'patch'
-        required: true
+  push:
 
 jobs:
 
@@ -24,7 +19,7 @@ jobs:
       - name: get next version and tag
         id: get-next-version-and-tag
         run: |
-          output=$(python3 release_utils.py --release-type ${{ github.event.inputs.name }})
+          output=$(python3 release_utils.py --release-type patch) 
           echo $output
           new_version=$(echo $output | awk '{print $1}')
           new_tag=$(echo $output | awk '{print $2}')
@@ -51,7 +46,7 @@ jobs:
 
     outputs:
       new_version: ${{ steps.get-next-version-and-tag.outputs.version }}
-      new_tag: ${{ steps.get-next-version-and-tag.outputs.tag }}
+      new_tag: test-${{ steps.get-next-version-and-tag.outputs.tag }}
 
   create_sdist:
     name: Create Source Distribution
@@ -136,7 +131,7 @@ jobs:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          python3 -m twine upload --repository pypi dist/*
+                # python3 -m twine upload --repository pypi dist/*
 
       # add and commit the updated version.py to main
       - name: add and commit
