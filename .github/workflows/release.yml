@@ -26,6 +26,7 @@ jobs:
           echo "new tag is $new_tag"
           echo ::set-output name=version::$new_version
           echo ::set-output name=tag::$new_tag
+          echo ::set-env name=NEW_VERSION::$new_version
 
       - name: add and commit
         uses: EndBug/add-and-commit@v9
@@ -34,14 +35,14 @@ jobs:
           author_email: ${{ secrets.AUTHOR_EMAIL }}
 
           # TODO: change this to main once shipit is disabled.
-          new_branch: $new_version
+          new_branch: ${{ env.NEW_VERSION }}
           default_author: github_actor
-          message: '$new_version release'
+          message: '${{ env.NEW_VERSION }} release'
           pathspec_error_handling: exitAtEnd
 
           # Arguments for the git pull command. Use NO-PULL to avoid the action pulling at all.
           # pull: 'NO-PULL'
-          tag: '$new_version'
+          tag: '${{ env.NEW_VERSION }}'
 
     outputs:
       new_version: ${{ steps.get-next-version-and-tag.outputs.version }}
