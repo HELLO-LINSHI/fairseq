@@ -50,7 +50,7 @@ jobs:
 
           # Arguments for the git pull command. Use NO-PULL to avoid the action pulling at all.
           # pull: 'NO-PULL'
-          tag: '${{ env.NEW_VERSION }}'
+          # tag: '${{ env.NEW_VERSION }}'
 
     outputs:
       new_version: ${{ steps.get-next-version-and-tag.outputs.version }}
