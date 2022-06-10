@@ -47,31 +47,31 @@ jobs:
       new_version: ${{ steps.get-next-version-and-tag.outputs.version }}
       new_tag: test-${{ steps.get-next-version-and-tag.outputs.tag }}
 
-  # create_sdist:
-  #   name: Create Source Distribution
-  #   needs: get_next_version
-  #   steps:
-  #      - uses: actions/checkout@v3
-  #        with:
-  #          ref: ${{ needs.get_next_version.outputs.new_version }}
+  create_sdist:
+    name: Create Source Distribution
+    needs: get_next_version
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.get_next_version.outputs.new_version }}
 
-  #     - name: Install Python
-  #       uses: actions/setup-python@v2
-  #       with:
-  #         python-version: '3.8'
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
 
-  #     - name: Upgrade pip
-  #       run: |
-  #         python3 -m pip install --upgrade pip
+      - name: Upgrade pip
+        run: |
+          python3 -m pip install --upgrade pip
 
-  #     - name: Create Source Distribution
-  #       run: |
-  #         pip install setuptools wheel twine
-  #         python3 setup.py sdist
+      - name: Create Source Distribution
+        run: |
+          pip install setuptools wheel twine
+          python3 setup.py sdist
  
-  #     - uses: actions/upload-artifact@v2
-  #       with:
-  #         path: dist/*.tar.gz
+      - uses: actions/upload-artifact@v2
+        with:
+          path: dist/*.tar.gz
 
   # build_wheels:
   #   name: Build wheels on ${{ matrix.os }}
