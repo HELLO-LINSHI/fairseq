@@ -41,116 +41,116 @@ jobs:
 
           # Arguments for the git pull command. Use NO-PULL to avoid the action pulling at all.
           # pull: 'NO-PULL'
-          # tag: '$new_version'
+          tag: '$new_version'
 
     outputs:
       new_version: ${{ steps.get-next-version-and-tag.outputs.version }}
       new_tag: test-${{ steps.get-next-version-and-tag.outputs.tag }}
 
-  create_sdist:
-    name: Create Source Distribution
-    needs: get_next_version
-    steps:
-       - uses: actions/checkout@v3
-         with:
-           ref: ${{ needs.get_next_version.outputs.new_version }}
+  # create_sdist:
+  #   name: Create Source Distribution
+  #   needs: get_next_version
+  #   steps:
+  #      - uses: actions/checkout@v3
+  #        with:
+  #          ref: ${{ needs.get_next_version.outputs.new_version }}
 
-      - name: Install Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'
+  #     - name: Install Python
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: '3.8'
 
-      - name: Upgrade pip
-        run: |
-          python3 -m pip install --upgrade pip
+  #     - name: Upgrade pip
+  #       run: |
+  #         python3 -m pip install --upgrade pip
 
-      - name: Create Source Distribution
-        run: |
-          pip install setuptools wheel twine
-          python3 setup.py sdist
+  #     - name: Create Source Distribution
+  #       run: |
+  #         pip install setuptools wheel twine
+  #         python3 setup.py sdist
  
-      - uses: actions/upload-artifact@v2
-        with:
-          path: dist/*.tar.gz
+  #     - uses: actions/upload-artifact@v2
+  #       with:
+  #         path: dist/*.tar.gz
 
-  build_wheels:
-    name: Build wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    needs: get_next_version
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
+  # build_wheels:
+  #   name: Build wheels on ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
+  #   needs: get_next_version
+  #   strategy:
+  #     matrix:
+  #       os: [ubuntu-latest, macos-latest]
 
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ needs.get_next_version.outputs.new_version }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         ref: ${{ needs.get_next_version.outputs.new_version }}
 
-      - name: Install Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'
+  #     - name: Install Python
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: '3.8'
 
-      - name: Upgrade pip
-        run: |
-          python3 -m pip install --upgrade pip
+  #     - name: Upgrade pip
+  #       run: |
+  #         python3 -m pip install --upgrade pip
 
-      - name: Install cibuildwheel
-        run: |
-          python3 -m pip install cibuildwheel
+  #     - name: Install cibuildwheel
+  #       run: |
+  #         python3 -m pip install cibuildwheel
 
-      - name: Build wheels for CPython
-        run: |
-          python3 -m cibuildwheel --output-dir dist
-        env:
-          CIBW_BUILD: "cp36-*64 cp37-*64 cp38-*64"
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
-          CIBW_BEFORE_BUILD: git submodule update --init --recursive && pip install .
-          # Install system library
-          CIBW_BEFORE_BUILD_LINUX: yum install -y libffi-devel || apt-get install -y libffi-devel || apk add --update --no-cache libffi-devel || true
-          CIBW_ENVIRONMENT: "PIP_ONLY_BINARY=numpy"
-          CIBW_SKIP: "*musllinux*"
+  #     - name: Build wheels for CPython
+  #       run: |
+  #         python3 -m cibuildwheel --output-dir dist
+  #       env:
+  #         CIBW_BUILD: "cp36-*64 cp37-*64 cp38-*64"
+  #         CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
+  #         CIBW_BEFORE_BUILD: git submodule update --init --recursive && pip install .
+  #         # Install system library
+  #         CIBW_BEFORE_BUILD_LINUX: yum install -y libffi-devel || apt-get install -y libffi-devel || apk add --update --no-cache libffi-devel || true
+  #         CIBW_ENVIRONMENT: "PIP_ONLY_BINARY=numpy"
+  #         CIBW_SKIP: "*musllinux*"
 
-      - uses: actions/upload-artifact@v2
-        with:
-          path: /dist/*.whl
+  #     - uses: actions/upload-artifact@v2
+  #       with:
+  #         path: /dist/*.whl
 
-  upload:
-    name: Upload to PyPi and create release
-    needs: [build_wheels, create_sdist, get_next_version]
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: artifact
-          path: dist
+  # upload:
+  #   name: Upload to PyPi and create release
+  #   needs: [build_wheels, create_sdist, get_next_version]
+  #   steps:
+  #     - uses: actions/download-artifact@v2
+  #       with:
+  #         name: artifact
+  #         path: dist
 
-      # build the PyPI package and upload it
-      - name: upload
-        env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-        run: |
-                # python3 -m twine upload --repository pypi dist/*
+  #     # build the PyPI package and upload it
+  #     - name: upload
+  #       env:
+  #         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+  #         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+  #       run: |
+  #               # python3 -m twine upload --repository pypi dist/*
 
-      # add and commit the updated version.py to main
-      - name: add and commit
-        uses: EndBug/add-and-commit@v9
-        with:
-          author_name: ${{ secrets.AUTHOR_NAME }}
-          author_email: ${{ secrets.AUTHOR_EMAIL }}
+  #     # add and commit the updated version.py to main
+  #     - name: add and commit
+  #       uses: EndBug/add-and-commit@v9
+  #       with:
+  #         author_name: ${{ secrets.AUTHOR_NAME }}
+  #         author_email: ${{ secrets.AUTHOR_EMAIL }}
 
-          # TODO: change this to main once shipit is disabled.
-          new_branch: ${{ needs.get_next_version.outputs.new_version }}
-          default_author: github_actor
-          message: '${{ needs.get_next_version.outputs.new_version }} release'
-          pathspec_error_handling: exitAtEnd
+  #         # TODO: change this to main once shipit is disabled.
+  #         new_branch: ${{ needs.get_next_version.outputs.new_version }}
+  #         default_author: github_actor
+  #         message: '${{ needs.get_next_version.outputs.new_version }} release'
+  #         pathspec_error_handling: exitAtEnd
 
-          # Arguments for the git pull command. Use NO-PULL to avoid the action pulling at all.
-          # pull: 'NO-PULL'
-          tag: '${{ needs.get_next_version.outputs.new_tag }}'
+  #         # Arguments for the git pull command. Use NO-PULL to avoid the action pulling at all.
+  #         # pull: 'NO-PULL'
+  #         tag: '${{ needs.get_next_version.outputs.new_tag }}'
 
-      # create the release on github
-      - name: create release on github
-        uses: ncipollo/release-action@v1
-        with:
-          tag: '${{ needs.get_next_version.outputs.new_tag }}'
+  #     # create the release on github
+  #     - name: create release on github
+  #       uses: ncipollo/release-action@v1
+  #       with:
+  #         tag: '${{ needs.get_next_version.outputs.new_tag }}'
