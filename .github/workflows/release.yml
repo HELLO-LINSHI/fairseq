@@ -34,7 +34,7 @@ jobs:
         run : |
           echo "current folder = $PWD"
           echo "current branch = $(git branch --show-current)"
-          output=$(python3 release_utils.py --release-type ${{ github.event.inputs.name }} --update-version)
+          output=$(python3 release_utils.py --release-type patch --update-version)
 
       - name: add and commit
         uses: EndBug/add-and-commit@v9
